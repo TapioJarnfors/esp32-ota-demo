@@ -13,34 +13,13 @@
 #include "protocol_examples_common.h"
 #include "esp_crt_bundle.h"
 
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
 #define TAG "OTA"
 SemaphoreHandle_t ota_semaphore;
 
-const int software_version = 1;
+const int software_version = 4;
 
 esp_err_t client_event_handler(esp_http_client_event_t *evt)
 {
-  switch(evt->event_id) {
-    case HTTP_EVENT_ON_DATA:
-      // Print first 200 bytes of received data for debugging
-      if (evt->data_len > 0) {
-        ESP_LOGI(TAG, "Data received: %d bytes", evt->data_len);
-        ESP_LOG_BUFFER_HEXDUMP(TAG, evt->data, MIN(200, evt->data_len), ESP_LOG_INFO);
-        // Also try to print as text to see if it's HTML
-        char temp[201];
-        int len = MIN(200, evt->data_len);
-        memcpy(temp, evt->data, len);
-        temp[len] = '\0';
-        ESP_LOGI(TAG, "First %d bytes as text: %s", len, temp);
-      }
-      break;
-    default:
-      break;
-  }
   return ESP_OK;
 }
 
@@ -63,7 +42,7 @@ void run_ota(void *params)
     ESP_ERROR_CHECK(example_connect());
 
     esp_http_client_config_t clientConfig = {
-        .url = "https://drive.usercontent.google.com/u/0/uc?id=1Rdv3QB-8Q8tJTomwmemp6j94PymE4MF9&export=download", // our ota location
+        .url = "https://github.com/TapioJarnfors/esp32-ota-demo/releases/download/v1.0.0/my_ota.bin", // our ota location
         .event_handler = client_event_handler,
         .crt_bundle_attach = esp_crt_bundle_attach,
         .buffer_size = 4096,
